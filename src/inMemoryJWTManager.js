@@ -11,13 +11,13 @@ const inMemoryJWTManager = () => {
       return true;
   };
 
-  const ereaseToken = () => {
+  const eraseToken = () => {
       inMemoryJWT = null;
       return true;
   }
 
   return {
-      ereaseToken,
+      eraseToken,
       getToken,
       setToken,
   }
