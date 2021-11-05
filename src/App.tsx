@@ -45,6 +45,7 @@ function loginWithGlobus(e: any) {
 }
 
 function logout(e: any) {
+  // Should revoke here
   window.localStorage.removeItem("auth");
   let url = window.location.href.split('?')[0];
   window.location.replace(url);
@@ -73,19 +74,19 @@ function App() {
       <AppBar position='static'>
          <Toolbar>
            {!authToken ? 
-          <Button color="inherit" onClick={loginWithGlobus}>Login</Button> :
-          <Button color="inherit" onClick={logout}>Logout</Button>
+          <Button color="secondary" variant="contained" onClick={loginWithGlobus}>Login</Button> :
+          <Button color="inherit" variant="contained" onClick={logout}>Logout</Button>
         }
         </Toolbar>
       </AppBar>
       <header className="App-header"> {!userinfo ? 
-        <div>
+        (<div>
           <img src={logo} className="App-logo" alt="logo" />
           <p>Globus Auth React Example!</p>
-        </div> :
-        <div>
+        </div>) :
+        (<div>
           {userinfo.identities.map(user => (<User user={user}/>))}
-        </div>
+        </div>)
         }
       </header>
     </div>
