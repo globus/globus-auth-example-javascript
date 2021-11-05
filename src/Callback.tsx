@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import logo from './logo.svg';
-import './App.css';
+import './Ballback.css';
 import {Button} from '@material-ui/core';
 import {AppBar, Toolbar, Typography, IconButton} from '@material-ui/core';
 import PkceAuth from './Auth';
@@ -13,7 +13,7 @@ import inMemoryJWTManager from './inMemoryJWTManager';
 // 3. Implement proper state management in React, but I'm trying to keep this short and minimal React for now.
 // 4. Switch to the better library https://github.com/openid/AppAuth-JS
 
-function App() {  
+function Callback() {  
   const [authToken, setAuthToken] = useState("");
 
   console.log(`App Token: ${authToken}`);
