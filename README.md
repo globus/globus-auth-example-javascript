@@ -1,3 +1,5 @@
+![Globus Examples](public/globus_examples.png)
+
 # Globus Auth Example: A Javascript React SPA
 
 This repo provides an example of integrating Globus Auth into a Javascript React Single Page Application (SPA). You can use this to integrate an auth layer into your application so that users can log in with any of the thousands of Globus-integrated identity providers. 
