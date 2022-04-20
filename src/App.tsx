@@ -1,38 +1,37 @@
-import React, { useState } from 'react';
-import logo from './logo.svg';
+import * as React from 'react';
 import './App.css';
-import {Button} from '@material-ui/core';
-import {AppBar, Toolbar} from '@material-ui/core';
+import Button from '@mui/material/Button';
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import PkceAuth from './Auth';
-import * as Types from './Types';
 import User from './User';
-
-// TODOs:
-// 1. Switch from local storage to in-memory or cookie HTTP-only storage, e.g.: https://marmelab.com/blog/2020/07/02/manage-your-jwt-react-admin-authentication-in-memory.html
-// 2. Fix the session for the PKCE library so we don't get code reuse errors.
-//     - For the moment, clear the session storage key 'pkce-state'
-// 3. Implement proper state management in React, but I'm trying to keep this short and minimal React for now.
-// 4. Switch to the better library https://github.com/openid/AppAuth-JS
+import jwt_decode from "jwt-decode";
+import { Identity } from './Types';
 
 // Simple check to see if we have an authorization callback in the URL
 let params = new URLSearchParams(window.location.search);
 let auth_code = params.get("code");
 if(auth_code) {
-  console.log("In the callback from a login!");
-  
   console.log("Getting a token...");
   const url = window.location.href;
   PkceAuth.exchangeForAccessToken(url).then((resp: any) => {
-    const token = resp.access_token;
-    //Set it in local storage (not the most secure solution).
-    window.localStorage.setItem("auth", token);
+    // If you get back multiple tokens you'll need to make changes here.
+    const access_token = resp.access_token;
+    const id_token = resp.id_token;
 
-    // We shouldn't need to do this, but guarantees no code reuse.
+    // Set it in local storage - the are a number of alternatives for
+    // saving this that are arguably more secure but this is the simplest
+    // for demonstration purposes.
+    window.localStorage.setItem("auth_token", access_token);
+    window.localStorage.setItem("id_token", id_token);
+
+    // This isn't strictly necessary but it ensures no code reuse.
     sessionStorage.removeItem('pkce_code_verifier');
     sessionStorage.removeItem('pkce_state');
     console.log('Cleared the PKCE state!');
 
-    //Redirect back to the root URL (simple but brittle way to clear the query params)
+    // Redirect back to the root URL (simple but brittle way to clear the query params)
     let url = window.location.href.split('?')[0];
     window.location.replace(url);
   });  
@@ -40,54 +39,57 @@ if(auth_code) {
 
 function loginWithGlobus(e: any) {
   let authUrl = PkceAuth.authorizeUrl();
-  console.log(`Sending them to ${authUrl}`);
+  console.log(`Sending the user to ${authUrl}`);
   window.location.replace(PkceAuth.authorizeUrl());
 }
 
 function logout(e: any) {
   // Should revoke here
-  window.localStorage.removeItem("auth");
+  window.localStorage.removeItem("auth_token");
+  window.localStorage.removeItem("id_token");
   let url = window.location.href.split('?')[0];
   window.location.replace(url);
 }
 
 function App() {
-  const [userinfo, setUserInfo] = useState<Types.IUserInfoResponse>();
+  const auth_token = localStorage.getItem("auth_token");
+  const raw_id_token = localStorage.getItem("id_token");
+  const id_token : Identity|null = raw_id_token ? jwt_decode(raw_id_token) : null;
 
-  let authToken = localStorage.getItem("auth");
-
-  // There are better ways to do this but keeping this a minimal example
-  if(authToken && !userinfo) {
-    console.log("Getting user information with token !");
-    fetch("https://auth.globus.org/p/whoami?include=identity_provider", {
-      headers: new Headers({
-      "Authorization": `Bearer ${authToken}`
-      })
-    }).then((response) => response.json())
-    .then((responseData) => {
-      setUserInfo(responseData);
-    })
-  } 
+  // For reference purposes, example of using the auth token to request 
+  // user info
+  // if(auth_token) {
+  //   console.log("Getting user information with token !");
+  //   fetch("https://auth.globus.org/p/whoami?include=identity_provider", {
+  //     headers: new Headers({
+  //     "Authorization": `Bearer ${auth_token}`
+  //     })
+  //   }).then((response) => response.json())
+  //   .then((responseData) => {
+  //     console.log(responseData);
+  //   })
+  // } 
 
   return (
     <div className="App">
       <AppBar position='static'>
          <Toolbar>
-           {!authToken ? 
-          <Button color="secondary" variant="contained" onClick={loginWithGlobus}>Login</Button> :
-          <Button color="inherit" variant="contained" onClick={logout}>Logout</Button>
+           {/* Note it's probably better to check the validity of the token as
+           well as its existence, please add an issue to the repo if this would 
+           be useful. */}
+           {!auth_token ? 
+          <Button color="secondary" variant="contained" onClick={loginWithGlobus} startIcon={<AccountCircleIcon/>}>Login</Button> :
+          <Button color="secondary" variant="contained" onClick={logout} startIcon={<AccountCircleIcon/>}>Logout</Button>
         }
         </Toolbar>
       </AppBar>
-      <header className="App-header"> {!userinfo ? 
-        (<div>
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>Globus Auth React Example!</p>
-        </div>) :
-        (<div>
-          {userinfo.identities.map(user => (<User user={user}/>))}
-        </div>)
-        }
+      <header className="App-header">  
+        <div>
+          <img src="globus_examples.png" className="App-logo" alt="logo" />
+          <p>Globus Auth Javascript SPA Example</p>
+        </div>
+        {/* If we have an ID token, show the user information */}
+        {id_token ? <User user={id_token}></User> : null}
       </header>
     </div>
   );

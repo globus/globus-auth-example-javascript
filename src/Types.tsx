@@ -1,28 +1,12 @@
 
-export interface IUserInfo {
-  email: string;
-  id: string;
-  identity_provider: string;
-  identity_type: string;
-  name: string;
+export interface Identity {
+  sub: string;
   organization: string;
-  status: string;
-  username: string;
-}
-
-export interface IIdentityProvider {
-  alternative_names: string[];
-  domains: string[];
-  id: string;
   name: string;
-  short_name: string;
-}
-
-export interface IIdentityProviders {
-  identity_providers: IIdentityProvider[];
-}
-
-export interface IUserInfoResponse {
-  identities: IUserInfo[];
-  included: IIdentityProviders;
+  preferred_username: string;
+  identity_provider: string;
+  identity_provider_display_name: string;
+  email: string;
+  last_authentication: number;
+  identity_set: Identity[];
 }
