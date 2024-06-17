@@ -1,3 +1,10 @@
+# ⚠️  Archive Notice  ⚠️
+
+**We recommend using the [Globus JavaScript SDK](https://github.com/globus/globus-sdk-javascript) to integrate Globus Auth and the rest of the Globus platform into your application.**
+
+---------
+
+
 ![Globus Examples](public/globus_examples.png)
 
 # Globus Auth Example: A Javascript React SPA
